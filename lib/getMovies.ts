@@ -9,7 +9,6 @@ const dashify = require("dashify");
 const baseUrl = "https://en.wikipedia.org/wiki/List_of_American_films_of_";
 const baseYear = 1990;
 const years = [...new Array(10).keys()].map(i => baseYear + i);
-// URL of the page we want to scrape
 
 type ScrapedRow = {
   title: string;
@@ -22,6 +21,7 @@ type ScrapedRow = {
 export type Movie = ScrapedRow & {
   year: string;
   id: string;
+  firstChar: string;
 }
 const removeDuplicates = (movies: Movie[]): Movie[] => {
   let usedIds = new Set();
@@ -99,6 +99,12 @@ async function getMovies() {
         const row = rowData as ScrapedRow;
         if (Object.values(rowData).some((value: string) => value?.trim().length)) {
           const newRow = row as Movie;
+          newRow.title = row.title.trim();
+          newRow.firstChar = newRow.title
+            // Remove any non-alphanumerics from the beginning of the title
+            .replace(/[^a-zA-Z0-9]*/, "")
+            // If it's a number, just make the sub for a # sign
+            .replace(/[0-9]/, "#")[0];
           newRow.year = year.toString();
           newRow.id = `${dashify(newRow.title)}-${newRow.year}`;
           output.push(newRow);

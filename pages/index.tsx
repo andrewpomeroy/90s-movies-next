@@ -1,5 +1,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
+import { useEffect } from 'react';
+import allLetters from '../constants/allLetters';
 import getMovies, { Movie } from '../lib/getMovies';
 import styles from '../styles/Home.module.css';
 
@@ -8,6 +10,7 @@ type HomeProps = {
 }
 
 export default function Home({ movies }: HomeProps) {
+  // const filteredMovies = movies.filter(movie => !allLetters.some(ltr => movie?.title[0]?.toLowerCase() === ltr));
   return (
     <div className={styles.container}>
       <Head>
