@@ -1,9 +1,13 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import getMovies from '../lib/getMovies';
-import styles from '../styles/Home.module.css'
+import Head from 'next/head';
+import Image from 'next/image';
+import getMovies, { Movie } from '../lib/getMovies';
+import styles from '../styles/Home.module.css';
 
-export default function Home({ movies }) {
+type HomeProps = {
+  movies: Movie[];
+}
+
+export default function Home({ movies }: HomeProps) {
   return (
     <div className={styles.container}>
       <Head>
@@ -17,7 +21,7 @@ export default function Home({ movies }) {
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
         <div>
-          {movies.map(([key, value]) => {
+          {/* {movies.map(([key, value]) => {
             return (
               <div key={key}>
                 <h2>{key}</h2>
@@ -30,7 +34,16 @@ export default function Home({ movies }) {
                 </ul>
               </div>
             )
-          })}     
+          })}      */}
+          <ul>
+            {movies.map((movie) => {
+              return (
+                <li key={movie.id}>
+                  {movie.title} — {movie.id}
+                </li>
+              )
+            })}
+          </ul>
         </div>
       </main>
 
@@ -52,7 +65,7 @@ export default function Home({ movies }) {
 
 export async function getStaticProps(context) {
   const movies = await getMovies();
-  console.log("%c💣️ movies", "background: aliceblue; color: dodgerblue; font-weight: bold", movies);
+  // console.log("%c💣️ movies", "background: aliceblue; color: dodgerblue; font-weight: bold", movies);
   return {
     props: {
       movies

@@ -4,11 +4,35 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const pretty = require("pretty");
 const fs = require("fs");
+const dashify = require("dashify");
 
 const baseUrl = "https://en.wikipedia.org/wiki/List_of_American_films_of_";
 const baseYear = 1990;
 const years = [...new Array(10).keys()].map(i => baseYear + i);
 // URL of the page we want to scrape
+
+type ScrapedRow = {
+  title: string;
+  director: string;
+  cast: string;
+  genre: string;
+  notes: string;
+}
+
+export type Movie = ScrapedRow & {
+  year: string;
+  id: string;
+}
+const removeDuplicates = (movies: Movie[]): Movie[] => {
+  let usedIds = new Set();
+  const output = movies.filter((movie) => {
+    if (!usedIds.has(movie.id)) {
+      usedIds.add(movie.id);
+      return true;
+    }
+  })
+  return output;
+} 
 
 const columns = [
   {
@@ -31,20 +55,15 @@ const columns = [
     name: "notes",
     selector: "td:nth-child(5)"
   },
-  // {
-  //   name: "year",
-  //   selector: "td:nth-child(6)"
-  // },
 ]
 
 
 // Async function which scrapes the data
 async function getMovies() {
-  let movies = new Map();
+  let movies = [];
   for (let i = 0; i < years.length; i++) {
     const year = years[i];
     const url = baseUrl + year;
-
     try {
       // Fetch HTML of the page we want to scrape
       const { data } = await axios.get(url);
@@ -72,19 +91,22 @@ async function getMovies() {
 
       let output = [];
       rows.each((idx, el) => {
-        const rowData = {}
+        const rowData = {};
         columns.forEach(col => {
           const cellContent = $(el).find(col.selector).text();
-          rowData[col.name] = cellContent;  
+          rowData[col.name] = String(cellContent);  
         })
-        if (Object.values(rowData).some(value => value && value.trim().length)) {
-          rowData.year = year.toString();
-          output.push(rowData);
+        const row = rowData as ScrapedRow;
+        if (Object.values(rowData).some((value: string) => value?.trim().length)) {
+          const newRow = row as Movie;
+          newRow.year = year.toString();
+          newRow.id = `${dashify(newRow.title)}-${newRow.year}`;
+          output.push(newRow);
         }
       });
-
       // movies.push(...nonEmptyRows);
-      movies.set(year, output);
+      // movies.set(year, output);
+      movies = [...movies, ...output];
 
       // fs.writeFile("test.json", JSON.stringify(nonEmptyRows, null, 2), (err) => {
       //   if (err) {
@@ -98,7 +120,8 @@ async function getMovies() {
     }
   }
   // console.log("%c💣️ movies.length", "background: aliceblue; color: dodgerblue; font-weight: bold", movies.length);
-  return Array.from(movies);
+  // return Array.from(movies);
+  return removeDuplicates(movies);
 }
 
 export default getMovies;
