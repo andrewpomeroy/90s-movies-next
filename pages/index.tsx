@@ -1,6 +1,8 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import { useEffect } from 'react';
+import { promises as fs } from 'fs'
+import path from 'path'
 import allLetters from '../constants/allLetters';
 import getMovies, { Movie } from '../lib/getMovies';
 import styles from '../styles/Home.module.css';
@@ -20,9 +22,9 @@ export default function Home({ movies }: HomeProps) {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
+        {/* <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+        </h1> */}
         <div>
           {/* {movies.map(([key, value]) => {
             return (
@@ -66,12 +68,39 @@ export default function Home({ movies }: HomeProps) {
   )
 }
 
+// export async function getStaticPaths() {
+
+//   // Call an external API endpoint to get posts
+//   // const res = await getMovies()
+
+//   // Get the paths we want to prerender based on posts
+//   // In production environments, prerender all pages
+//   // (slower builds, but faster initial page load)
+//   const paths = posts.map((post) => ({
+//     params: { id: post.id },
+//   }))
+
+//   // { fallback: false } means other routes should 404
+//   return { paths, fallback: false }
+// }
+
 export async function getStaticProps(context) {
-  const movies = await getMovies();
-  // console.log("%c💣️ movies", "background: aliceblue; color: dodgerblue; font-weight: bold", movies);
+  // const movies = await getMovies();
+
+  const getMovies = async () => {
+    const filePath = path.join(process.cwd(), './dist/movies.json');
+    const movies = await fs.readFile(filePath, 'utf8');
+    console.log(movies);    
+    try {
+      return JSON.parse(movies);
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
   return {
     props: {
-      movies
-    }, // will be passed to the page component as props
+      movies: await getMovies()
+    }
   }
 }

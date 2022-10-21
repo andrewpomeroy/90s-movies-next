@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "build": "node buildMoviesList.js && next build",
+    "start": "node buildMoviesList.js && next start",
     "lint": "next lint"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
     "@types/node": "^18.7.14",
     "@types/react": "^18.0.18",
     "eslint": "8.23.0",
-    "eslint-config-next": "12.2.5"
+    "eslint-config-next": "12.2.5",
+    "ts-node": "^10.9.1"
   }
 }
